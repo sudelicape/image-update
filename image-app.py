@@ -17,7 +17,7 @@ st.title("🛍️ Trendyol Görsel Güncelleme Paneli")
 # Kampanya Seçimi
 kampanya = st.radio(
     "Kampanya Seçiniz:",
-    ('kampanya1', 'kampanya1-sarı-tonik', 'kampanya1-cok-yonlu')
+    ('2.si 1 TL', '2.si 1 TL - Sarı Tonik Tester', '2.si 1 TL - Çok Yönlü Tester')
 )
 
 if st.button("🔄 Güncellemeyi Başlat"):
@@ -31,9 +31,9 @@ if st.button("🔄 Güncellemeyi Başlat"):
     
     # --- Sheet seçimi ---
     sheet_mapping = {
-        'kampanya1': st.secrets["EXCEL_SHEET_1"],
-        'kampanya1-sarı-tonik': st.secrets["EXCEL_SHEET_2"],
-        'kampanya1-cok-yonlu': st.secrets["EXCEL_SHEET_3"]
+        '2.si 1 TL': st.secrets["EXCEL_SHEET_1"],
+        '2.si 1 TL - Sarı Tonik Tester': st.secrets["EXCEL_SHEET_2"],
+        '2.si 1 TL - Çok Yönlü Tester': st.secrets["EXCEL_SHEET_3"]
     }
     
     df_kampanya = pd.read_excel(excel_bytes, sheet_name=sheet_mapping[kampanya])
