@@ -224,27 +224,32 @@ elif page == "Termin Süresi Güncelleme":
 
                 if batch_request_id:
                     st.info(f"Batch ID: {batch_request_id}")
-                    st.write("⏳ Batch sonucu sorgulanıyor, lütfen bekleyin...")
-                    time.sleep(10)
 
                     check_url = f"https://apigw.trendyol.com/integration/product/sellers/{supplierid}/products/batch-requests/{batch_request_id}"
-                    check_response = requests.get(check_url, auth=HTTPBasicAuth(api_key, api_secret))
 
-                    if check_response.status_code == 200:
+                    while True:
+                        check_response = requests.get(check_url, auth=HTTPBasicAuth(api_key, api_secret))
+                        if check_response.status_code != 200:
+                            st.error(f"❌ Batch sorgulama hatası: {check_response.status_code}")
+                            st.error(check_response.text)
+                            break
+
                         data = check_response.json()
                         st.write(f"Batch ID: {data['batchRequestId']}")
                         st.write(f"Toplam ürün: {data['itemCount']}")
                         st.write(f"Başarısız ürün: {data['failedItemCount']}")
                         st.write(f"Durum: {data['status']}")
 
-                        for item in data['items']:
-                            if item['status'] != "APPROVED":
-                                barcode = item['requestItem']['barcode']
-                                failure_reasons = item.get('failureReasons', [])
-                                st.write(f"🚫 {barcode}: {failure_reasons}")
-                    else:
-                        st.error(f"❌ Batch sorgulama hatası: {check_response.status_code}")
-                        st.error(check_response.text)
+                        if data['status'] == "COMPLETED":
+                            for item in data['items']:
+                                if item['status'] != "APPROVED":
+                                    barcode = item['requestItem']['barcode']
+                                    failure_reasons = item.get('failureReasons', [])
+                                    st.write(f"🚫 {barcode}: {failure_reasons}")
+                            break
+                        else:
+                            st.write("⏳ Batch işlemi devam ediyor, 5 sn bekleniyor...")
+                            time.sleep(5)
                 else:
                     st.warning("⚠️ Batch ID alınamadı!")
             else:
