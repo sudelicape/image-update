@@ -45,7 +45,6 @@ if page == "Görsel Güncelleme":
 
         st.write(f"Seçilen kampanya: **{kampanya}**")
 
-        # --- Excel Dosyasını Yükle ---
         excel_url = st.secrets["EXCEL_URL"]
         response = requests.get(excel_url)
         excel_bytes = io.BytesIO(response.content)
@@ -61,7 +60,6 @@ if page == "Görsel Güncelleme":
 
         df_kampanya = pd.read_excel(excel_bytes, sheet_name=sheet_mapping[kampanya])
 
-        # --- Ürünleri Çek ---
         page_num = 0
         page_size = 100
         all_products = []
@@ -86,30 +84,24 @@ if page == "Görsel Güncelleme":
             all_products.extend(products)
 
             total_pages = data.get('totalPages')
-            st.write(f"Fetched page {page_num + 1} / {total_pages}")
-
             if page_num + 1 >= total_pages:
                 break
 
             page_num += 1
 
-        st.write(f"✅ Toplam ürün çekildi: {len(all_products)}")
+        st.write(f"✅ Toplam {len(all_products)} ürün çekildi.")
 
-        # --- Update Payload ---
         update_payload = []
         updated_count = 0
 
         for product in all_products:
             barcode = product['barcode']
-
             match = df_kampanya[df_kampanya['Barkod'] == barcode]
 
             if not match.empty:
                 new_image_url = match.iloc[0]['link']
-
                 original_images = product.get('images', [])
                 new_images_list = [{"url": new_image_url}]
-
                 if len(original_images) > 1:
                     new_images_list.extend(original_images[1:])
 
@@ -130,26 +122,21 @@ if page == "Görsel Güncelleme":
                 })
 
                 updated_count += 1
-                st.write(f"[OK] Güncellenecek ürün: {barcode} → yeni görsel: {new_image_url}")
 
-        st.write(f"\n📝 Güncellenecek toplam ürün sayısı: {updated_count}")
-
-        # --- PUT Update ---
-        if update_payload:
-            update_url = f"https://apigw.trendyol.com/integration/product/sellers/{supplierid}/products"
-            body = {"items": update_payload}
-
+        if updated_count > 0:
+            st.write(f"📝 {updated_count} ürün güncellemeye hazırlanıyor...")
             st.write("🚀 Güncellemeler gönderiliyor...")
 
-            put_response = requests.put(update_url, auth=HTTPBasicAuth(api_key, api_secret), json=body)
+            update_url = f"https://apigw.trendyol.com/integration/product/sellers/{supplierid}/products"
+            put_response = requests.put(update_url, auth=HTTPBasicAuth(api_key, api_secret), json={"items": update_payload})
 
             if put_response.status_code == 200:
-                st.success("✅ Update başarılı!")
+                st.success("✅ Tüm ürünler başarıyla güncellendi!")
             else:
-                st.error(f"❌ Update hatası: {put_response.status_code}")
+                st.error(f"❌ Güncelleme sırasında hata oluştu! Status code: {put_response.status_code}")
                 st.error(put_response.text)
         else:
-            st.warning("⚠️ Güncellenecek ürün bulunamadı.")
+            st.warning("⚠️ Bu kampanya için güncellenecek ürün bulunamadı.")
 
 # --- Termin Süresi Güncelleme Bölümü ---
 elif page == "Termin Süresi Güncelleme":
@@ -169,7 +156,6 @@ elif page == "Termin Süresi Güncelleme":
 
         st.write(f"Seçilen termin süresi: **{delivery_duration_choice}** gün")
 
-        # --- Ürünleri Çek ---
         page_num = 0
         page_size = 100
         all_products = []
@@ -194,16 +180,13 @@ elif page == "Termin Süresi Güncelleme":
             all_products.extend(products)
 
             total_pages = data.get('totalPages')
-            st.write(f"Fetched page {page_num + 1} / {total_pages}")
-
             if page_num + 1 >= total_pages:
                 break
 
             page_num += 1
 
-        st.write(f"✅ Toplam ürün çekildi: {len(all_products)}")
+        st.write(f"✅ Toplam {len(all_products)} ürün çekildi.")
 
-        # --- Update Payload ---
         update_payload = []
         updated_count = 0
 
@@ -226,26 +209,21 @@ elif page == "Termin Süresi Güncelleme":
             })
 
             updated_count += 1
-            st.write(f"[OK] Güncellenecek ürün: {product['barcode']} → deliveryDuration: {delivery_duration_choice}")
 
-        st.write(f"\n📝 Güncellenecek toplam ürün sayısı: {updated_count}")
-
-        # --- PUT Update ---
-        if update_payload:
-            update_url = f"https://apigw.trendyol.com/integration/product/sellers/{supplierid}/products"
-            body = {"items": update_payload}
-
+        if updated_count > 0:
+            st.write(f"📝 {updated_count} ürün güncellemeye hazırlanıyor...")
             st.write("🚀 Güncellemeler gönderiliyor...")
 
-            put_response = requests.put(update_url, auth=HTTPBasicAuth(api_key, api_secret), json=body)
+            update_url = f"https://apigw.trendyol.com/integration/product/sellers/{supplierid}/products"
+            put_response = requests.put(update_url, auth=HTTPBasicAuth(api_key, api_secret), json={"items": update_payload})
 
             if put_response.status_code == 200:
                 response_json = put_response.json()
                 batch_request_id = response_json.get('batchRequestId')
-                st.success("✅ Update başarılı!")
-                if batch_request_id:
-                    st.info(f"BatchRequestId: {batch_request_id}")
+                st.success("✅ Termin süresi güncellemesi başarılı!")
 
+                if batch_request_id:
+                    st.info(f"Batch ID: {batch_request_id}")
                     st.write("⏳ Batch sonucu sorgulanıyor, lütfen bekleyin...")
                     time.sleep(10)
 
@@ -254,29 +232,23 @@ elif page == "Termin Süresi Güncelleme":
 
                     if check_response.status_code == 200:
                         data = check_response.json()
-
-                        st.write(f"BatchRequestId: {data['batchRequestId']}")
-                        st.write(f"Toplam item: {data['itemCount']}")
-                        st.write(f"Başarısız item: {data['failedItemCount']}")
-                        st.write(f"Genel status: {data['status']}")
+                        st.write(f"Batch ID: {data['batchRequestId']}")
+                        st.write(f"Toplam ürün: {data['itemCount']}")
+                        st.write(f"Başarısız ürün: {data['failedItemCount']}")
+                        st.write(f"Durum: {data['status']}")
 
                         for item in data['items']:
-                            barcode = item['requestItem']['barcode']
-                            item_status = item['status']
-                            failure_reasons = item.get('failureReasons', [])
-
-                            st.write(f"- {barcode}: {item_status}")
-                            if failure_reasons:
-                                st.write(f"  🚫 FailureReasons: {failure_reasons}")
+                            if item['status'] != "APPROVED":
+                                barcode = item['requestItem']['barcode']
+                                failure_reasons = item.get('failureReasons', [])
+                                st.write(f"🚫 {barcode}: {failure_reasons}")
                     else:
                         st.error(f"❌ Batch sorgulama hatası: {check_response.status_code}")
                         st.error(check_response.text)
                 else:
-                    st.warning("⚠️ BatchRequestId dönmedi!")
+                    st.warning("⚠️ Batch ID alınamadı!")
             else:
-                st.error(f"❌ Update hatası: {put_response.status_code}")
+                st.error(f"❌ Güncelleme sırasında hata oluştu! Status code: {put_response.status_code}")
                 st.error(put_response.text)
         else:
             st.warning("⚠️ Güncellenecek ürün bulunamadı.")
-
-
