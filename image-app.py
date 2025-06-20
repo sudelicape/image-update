@@ -36,11 +36,11 @@ if page == "Görsel Güncelleme":
         ('2.si 1 TL', '2.si 1 TL - Sarı Tonik Tester', '2.si 1 TL - Çok Yönlü Tester', '3 Al 1 Öde', '3 Al 1 Öde - Sarı Tonik Tester', '3 Al 1 Öde - Çok Yönlü Tester'  )
     )
 
-    confirm = st.checkbox("Emin misiniz? Güncellemeyi başlatmak istediğinize emin olun.")
+    confirm = st.checkbox("Güncellemeyi başlatmak istediğinize emin olun.")
 
     if st.button("🔄 Görsel Güncellemeyi Başlat"):
         if not confirm:
-            st.warning("⚠️ Lütfen önce 'Emin misiniz?' kutusunu işaretleyin.")
+            st.warning("⚠️ Lütfen önce 'Güncellemeyi başlatmak istediğinize emin olun.' kutusunu işaretleyin.")
             st.stop()
 
         st.write(f"Seçilen kampanya: **{kampanya}**")
@@ -160,11 +160,11 @@ elif page == "Termin Süresi Güncelleme":
         (1, 2)
     )
 
-    confirm = st.checkbox("Emin misiniz? Güncellemeyi başlatmak istediğinize emin olun.")
+    confirm = st.checkbox("Güncellemeyi başlatmak istediğinize emin olun.")
 
     if st.button("🔄 Termin Süresi Güncellemeyi Başlat"):
         if not confirm:
-            st.warning("⚠️ Lütfen önce 'Emin misiniz?' kutusunu işaretleyin.")
+            st.warning("⚠️ Lütfen önce 'Güncellemeyi başlatmak istediğinize emin olun.' kutusunu işaretleyin.")
             st.stop()
 
         st.write(f"Seçilen termin süresi: **{delivery_duration_choice}** gün")
