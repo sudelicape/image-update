@@ -245,7 +245,9 @@ elif page == "Termin Süresi Güncelleme":
                                 if item['status'] != "APPROVED":
                                     barcode = item['requestItem']['barcode']
                                     failure_reasons = item.get('failureReasons', [])
-                                    st.write(f"🚫 {barcode}: {failure_reasons}")
+                                    if failure_reasons:  # Eğer boş değilse
+                                        st.write(f"🚫 {barcode}: {failure_reasons}")
+
                             break
                         else:
                             st.write("⏳ Batch işlemi devam ediyor, 5 sn bekleniyor...")
