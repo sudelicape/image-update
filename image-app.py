@@ -19,8 +19,9 @@ st.title("🛍️ Trendyol Ürün Güncelleme Paneli")
 st.sidebar.header("📂 Sayfa Menüsü")
 page = st.sidebar.radio(
     "Sayfa Seçiniz:",
-    ("Görsel Güncelleme", "Termin Süresi Güncelleme")
+    ("Görsel Güncelleme", "Termin Süresi Güncelleme", "2 Adet Siparişleri Listele")
 )
+
 
 # --- Ortak Bilgiler ---
 api_key = st.secrets["API_KEY"]
@@ -259,3 +260,84 @@ elif page == "Termin Süresi Güncelleme":
                 st.error(put_response.text)
         else:
             st.warning("⚠️ Güncellenecek ürün bulunamadı.")
+# --- 2 Adet Siparişleri Listele Bölümü ---
+elif page == "2 Adet Siparişleri Listele":
+    st.header("📦 2 Adet Siparişleri Listeleme")
+
+    trendyol_filter = st.radio(
+        "Trendyol Express dahil olsun mu?",
+        ("yes", "no"),
+        horizontal=True
+    )
+
+    if st.button("📋 Listeyi Getir"):
+        st.write("📡 Siparişler çekiliyor...")
+
+        now = int(time.time() * 1000)
+        two_weeks_ago = now - (14 * 24 * 60 * 60 * 1000)
+
+        status = "Created"
+        orderByField = "PackageLastModifiedDate"
+        orderByDirection = "DESC"
+        page_size = 50
+
+        all_orders = []
+        page_num = 0
+
+        while True:
+            url = (
+                f"https://apigw.trendyol.com/integration/order/sellers/{supplierid}/orders"
+                f"?status={status}"
+                f"&startDate={two_weeks_ago}"
+                f"&endDate={now}"
+                f"&orderByField={orderByField}"
+                f"&orderByDirection={orderByDirection}"
+                f"&page={page_num}"
+                f"&size={page_size}"
+            )
+            
+            response = requests.get(url, auth=HTTPBasicAuth(api_key, api_secret))
+            data = response.json()
+            
+            if response.status_code != 200:
+                st.error(f"ERROR: {response.status_code}")
+                st.error(data)
+                break
+            
+            content = data.get("content", [])
+            if not content:
+                break
+            
+            all_orders.extend(content)
+            
+            if (page_num + 1) >= data.get("totalPages", 1):
+                break
+            
+            page_num += 1
+
+        st.write(f"✅ Toplam {len(all_orders)} sipariş çekildi.")
+
+        summary = {}
+
+        for order in all_orders:
+            if trendyol_filter == "no" and order.get("cargoProviderName") == "Trendyol Express Marketplace":
+                continue
+            
+            lines = order.get("lines", [])
+            
+            if len(lines) == 1 and lines[0]["quantity"] == 2:
+                urun_adi = lines[0].get("productName", "Bilinmeyen Ürün")
+                if urun_adi in summary:
+                    summary[urun_adi] += 1
+                else:
+                    summary[urun_adi] = 1
+
+        summary_df = pd.DataFrame(summary.items(), columns=["Ürün Adı", "Sipariş Sayısı"])
+        summary_df = summary_df.sort_values(by="Sipariş Sayısı", ascending=False)
+
+        if summary_df.empty:
+            st.warning("⚠️ Uygun sipariş bulunamadı.")
+        else:
+            st.write("### 📋 2 ADET AYNI ÜRÜN OLAN SİPARİŞLER")
+            st.dataframe(summary_df, use_container_width=True)
+
