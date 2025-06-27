@@ -34,7 +34,7 @@ if page == "Görsel Güncelleme":
 
     kampanya = st.radio(
         "Kampanya Seçiniz:",
-        ('2.si 1 TL', '2.si 1 TL - Sarı Tonik Tester', '2.si 1 TL - Çok Yönlü Tester', '3 Al 1 Öde', '3 Al 1 Öde - Sarı Tonik Tester', '3 Al 1 Öde - Çok Yönlü Tester'  )
+        ('2.si 1 TL', '2.si 1 TL - Sarı Tonik Tester', '2.si 1 TL - Çok Yönlü Tester', '3 Al 1 Öde', '3 Al 1 Öde - Sarı Tonik Tester', '3 Al 1 Öde - Çok Yönlü Tester', '3 Al 2 Öde', '4 Al 2 Öde'  )
     )
 
     confirm = st.checkbox("Güncellemeyi başlatmak istediğinize emin olun.")
@@ -56,7 +56,9 @@ if page == "Görsel Güncelleme":
             '2.si 1 TL - Çok Yönlü Tester': st.secrets["EXCEL_SHEET_3"], 
             '3 Al 1 Öde': st.secrets["EXCEL_SHEET_4"],
             '3 Al 1 Öde - Sarı Tonik Tester': st.secrets["EXCEL_SHEET_5"],
-            '3 Al 1 Öde - Çok Yönlü Tester': st.secrets["EXCEL_SHEET_6"]
+            '3 Al 1 Öde - Çok Yönlü Tester': st.secrets["EXCEL_SHEET_6"],
+            '3 Al 2 Öde': st.secrets["EXCEL_SHEET_7"],
+            '4 Al 2 Öde': st.secrets["EXCEL_SHEET_8"]
         }
 
         df_kampanya = pd.read_excel(excel_bytes, sheet_name=sheet_mapping[kampanya])
