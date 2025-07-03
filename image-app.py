@@ -327,7 +327,7 @@ elif page == "2 Adet Siparişleri Listele":
             
             lines = order.get("lines", [])
             
-            if len(lines) == 1 and lines[0]["quantity"] == 2:
+            if len(lines) == 1 and lines[0]["quantity"] == 4:
                 urun_adi = lines[0].get("productName", "Bilinmeyen Ürün")
                 if urun_adi in summary:
                     summary[urun_adi] += 1
